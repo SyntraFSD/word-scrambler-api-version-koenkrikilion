@@ -42,15 +42,22 @@ function scrambleArray(oldArray) {
 
 function scrambleText(oldText) {
   //  return scrambled text
-  const textArray = textToWordArray(oldText);
-  const scrambledArray = scrambleArray(textArray);
-  return arrayToText(scrambledArray);
+  const request = new XMLHttpRequest();
+  const postData = {
+    text: oldText,
+  };
+  request.addEventListener('readystatechange', function (event) {
+    console.log(event);
+  });
+  request.open('POST', 'http://connect4.pienter.space/api/scramble');
+  request.setRequestHeader('content-type', 'application/JSON');
+  request.send(JSON.stringify(postData));
 }
 
 function onClickScramble() {
   //  update textContent of resultContainer
   const userInputValue = getUserInput();
-  resultContainer.textContent = scrambleText(userInputValue);
+  scrambleText(userInputValue);
 }
 
 function realTimeScramble() {

@@ -1,72 +1,110 @@
-//select textarea
-let userInput;
-//select btn
-let submitBtn;
-//select result container
-let resultContainer;
-//# select wordCount
-let wordCountContainer;
-//# select letterCount
-let letterCountContainer;
-
+// select textarea
+const userInput = document.querySelector('#user-input');
+// select btn
+const submitBtn = document.querySelector('#submit-btn');
+// select result container
+const resultContainer = document.querySelector('#result-container');
+// # select wordCount
+const wordCountContainer = document.querySelector('#word-count');
+// # select letterCount
+const letterCountContainer = document.querySelector('#letter-count');
 
 function getUserInput() {
-  //return value of userInput
+  // return value of userInput
+  return userInput.value;
 }
 
 function textToWordArray(text) {
-  //return array of words
+  // return array of words
+  return text.trim().split(' ');
 }
 
 function arrayToText(array) {
+  return array.join(' ');
 }
 
 function getRandomNumber(max) {
-  //return random number between 0 and max (including 0 and excluding max)
+  // return random number between 0 and max (including 0 and excluding max)
+  return Math.floor(Math.random() * max);
 }
 
 function scrambleArray(oldArray) {
-  //return scrambled array
+  // return scrambled array
+  const newArray = [];
+
+  while (oldArray.length > 0) {
+    const randomIndex = getRandomNumber(oldArray.length);
+    newArray.push(oldArray[randomIndex]);
+    oldArray.splice(randomIndex, 1);
+  }
+  return newArray;
 }
 
-function scrambleText(text) {
-  // return scrambled text
+function scrambleText(oldText) {
+  //  return scrambled text
+  const request = new XMLHttpRequest();
+  const postData = {
+    text: oldText,
+  };
+  request.addEventListener('readystatechange', function (event) {
+    const response = event.target;
+    if(response.readyState === 4 && response.status === 200){
+      const responseText = JSON.parse(response.responseText);
+      resultContainer.textContent = responseText.scrambled_text;
+    }
+  });
+  request.open('POST', 'http://connect4.pienter.space/api/scramble');
+  request.setRequestHeader('content-type', 'application/json');
+  request.send(JSON.stringify(postData));
 }
 
 function onClickScramble() {
-  // update textContent of resultContainer
+  //  update textContent of resultContainer
+  const userInputValue = getUserInput();
+  scrambleText(userInputValue);
 }
 
-function realTimeScramble(event) {
-  //## update textContent of resultContainer realtime
+function realTimeScramble() {
+  // ## update textContent of resultContainer realtime
+  const userInputValue = this.value;
+  resultContainer.textContent = scrambleText(userInputValue);
 }
 
 function getWordCount(text) {
-  //# return word count
+  // # return word count
+  const userInputArray = textToWordArray(text);
+  return userInputArray.length;
 }
 
 function getLetterCount(text) {
-  //# return letter count
+  // # return letter count
+  return text.length;
 }
 
 function updateWordCount(wordCount) {
-  //# update the Word Count
+  // # update the Word Count
+  wordCountContainer.textContent = wordCount;
 }
 
 function updateLetterCount(letterCount) {
-  //# update the Letter Count
+  // # update the Letter Count
+  letterCountContainer.textContent = letterCount;
 }
 
-function updateCounts(event) {
-  //# update Word Count and Letter Count
-  let currentText = this.value;
-  // this when function is executed by event => event.target
-  // this.value == event.target.value
+function updateCounts() {
+  // # update Word Count and Letter Count
+  const currentText = this.value;
+  //  this when function is executed by event => event.target
+  //  this.value == event.target.value
+  const wordCount = getWordCount(currentText);
+  const letterCount = getLetterCount(currentText);
+  updateWordCount(wordCount);
+  updateLetterCount(letterCount);
 }
 
-//add click event listener to submitBtn
-submitBtn.addEventListener("click", onClickScramble);
-//# add input event listener to userInput for counts
-userInput.addEventListener("input", updateCounts);
-//## add input event listener to userinput for realTimeScramble
-userInput.addEventListener("input", realTimeScramble);
+// add click event listener to submitBtn
+submitBtn.addEventListener('click', onClickScramble);
+// # add input event listener to userInput for counts
+userInput.addEventListener('input', updateCounts);
+// ## add input event listener to userInput for realTimeScramble
+userInput.addEventListener('input', realTimeScramble);
